@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +30,7 @@ class fragment_tvshow_list : Fragment() {
     private lateinit var recyclerview : RecyclerView
     private val adapter = TVShowsAdapter(listOf(), ::onClickedTVShow)
 
+    private val viewModel: TVShowListViewModel by viewModels()
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -49,20 +52,7 @@ class fragment_tvshow_list : Fragment() {
             adapter = this@fragment_tvshow_list.adapter
         }
 
-        Singletons.tvShowAPI.getTopTVShow("dd2d91f98be44a04d0ba7a02272bb43d").enqueue(object: Callback<TVShowResponseList>{
-            override fun onFailure(call: Call<TVShowResponseList>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onResponse(call: Call<TVShowResponseList>, response: Response<TVShowResponseList>) {
-                if(response.isSuccessful && response.body() != null){
-                    val tvShowresponse : TVShowResponseList =  response.body()!!
-                    adapter.updateList(tvShowresponse.results)
-                }
-            }
-        }
-
-        )
+        viewModel.TVShowList.observe(viewLifecycleOwner, Observer { list -> adapter.updateList(list) })
 
     }
 
