@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -28,6 +31,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 class fragment_tvshow_list : Fragment() {
 
     private lateinit var recyclerview : RecyclerView
+    private lateinit var loader : ProgressBar
+    private lateinit var textViewerror : TextView
+
     private val adapter = TVShowsAdapter(listOf(), ::onClickedTVShow)
 
     private val viewModel: TVShowListViewModel by viewModels()
@@ -44,6 +50,8 @@ class fragment_tvshow_list : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         recyclerview = view.findViewById(R.id.tvshow_recyclerview)
+        loader = view.findViewById(R.id.tvshow_loader)
+        textViewerror = view.findViewById(R.id.tvshow_error)
 
 
 
@@ -52,7 +60,15 @@ class fragment_tvshow_list : Fragment() {
             adapter = this@fragment_tvshow_list.adapter
         }
 
-        viewModel.TVShowList.observe(viewLifecycleOwner, Observer { list -> adapter.updateList(list) })
+        viewModel.TVShowList.observe(viewLifecycleOwner, Observer { tvshowmodel ->
+                loader.isVisible = tvshowmodel is TVShowLoader
+                textViewerror.isVisible = tvshowmodel is TVShowError
+
+                    if (tvshowmodel is TVShowSuccess) {
+                        adapter.updateList(tvshowmodel.TVShowList)
+                    }
+
+        })
 
     }
 

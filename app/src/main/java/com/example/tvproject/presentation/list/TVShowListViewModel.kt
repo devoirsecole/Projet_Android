@@ -11,7 +11,7 @@ import retrofit2.Response
 
 class TVShowListViewModel : ViewModel() {
 
-    val TVShowList : MutableLiveData<List<TVShow>> = MutableLiveData()
+    val TVShowList : MutableLiveData<TVShowModel> = MutableLiveData()
 
     init{
 
@@ -20,17 +20,18 @@ class TVShowListViewModel : ViewModel() {
     }
 
     private fun callApi() {
+        TVShowList.value = TVShowLoader
         Singletons.tvShowAPI.getTopTVShow("dd2d91f98be44a04d0ba7a02272bb43d").enqueue(object: Callback<TVShowResponseList> {
             override fun onFailure(call: Call<TVShowResponseList>, t: Throwable) {
-                TODO("Not yet implemented")
+                TVShowList.value = TVShowError
             }
 
             override fun onResponse(call: Call<TVShowResponseList>, response: Response<TVShowResponseList>) {
                 if(response.isSuccessful && response.body() != null){
                     val tvShowresponse : TVShowResponseList =  response.body()!!
-                    TVShowList.value = tvShowresponse.results
-
-
+                    TVShowList.value = TVShowSuccess(tvShowresponse.results)
+                }else{
+                    TVShowList.value = TVShowError
                 }
             }
         }
